@@ -1,9 +1,9 @@
 import ast
+import sys
 from collections import defaultdict
 from enum import Enum
-import importlib
 from pathlib import Path
-import sys
+from typing import Union
 
 import stdlib_list
 
@@ -20,27 +20,31 @@ class Module(Enum):
     Unknown = 4
 
 
-def get_imports(source_code: str) -> list[str]:
+def _get_import_nodes(source_code: str) -> list[Union[ast.Import, ast.ImportFrom]]:
     tree = ast.parse(source_code)
-    import_nodes = [
+    return [
         node
         for node in ast.walk(tree)
         if isinstance(node, (ast.Import, ast.ImportFrom))
     ]
-    imported_modules = []
 
+
+def get_imports(source_code: str) -> list[str]:
+    import_nodes = _get_import_nodes(source_code)
+
+    imported_modules = []
     for node in import_nodes:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 imported_modules.append(alias.name)
         elif isinstance(node, ast.ImportFrom):
-            imported_modules.append(node.module)
+            if node.module is not None:
+                imported_modules.append(node.module)
 
-    # Return a list of unique module names
     return list(set(imported_modules))
 
 
-def get_type_of_module(module_name: str) -> str:
+def get_type_of_module(module_name: str) -> Module:
     if module_name in STANDARD_LIB_MODULES:
         return Module.Stdlib
     module_path = module_name.replace(".", "/")
@@ -51,7 +55,7 @@ def get_type_of_module(module_name: str) -> str:
     raise Module.Unknown
 
 
-def get_modules_by_type(imported_modules: list[str]) -> dict[str, list[str]]:
+def get_modules_by_type(imported_modules: list[str]) -> defaultdict[Module, list[str]]:
     modules_by_type = defaultdict(list)
     for module_name in imported_modules:
         origin = get_type_of_module(module_name)
