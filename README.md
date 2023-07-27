@@ -1,0 +1,3 @@
+# List modules and their origins
+
+Does not work yet, figuring out if something is Standard Library is quite easy, but PyPI vs own module is harder and I need to revisit ...
