@@ -16,7 +16,6 @@ class Module(Enum):
     Stdlib = 1
     External = 2
     Project = 3
-    Unknown = 4
 
 
 def _get_import_nodes(source_code: str) -> list[Union[ast.Import, ast.ImportFrom]]:
@@ -51,10 +50,11 @@ def get_type_of_module(path: Path, module_name: str) -> Module:
         return Module.Project
     else:
         return Module.External
-    raise Module.Unknown
 
 
-def get_modules_by_type(path: Path, imported_modules: list[str]) -> defaultdict[Module, list[str]]:
+def get_modules_by_type(
+    path: Path, imported_modules: list[str]
+) -> defaultdict[Module, list[str]]:
     modules_by_type = defaultdict(list)
     for module_name in imported_modules:
         origin = get_type_of_module(path, module_name)
