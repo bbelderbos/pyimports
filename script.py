@@ -63,11 +63,7 @@ def get_modules_by_type(path: Path, imported_modules: list[str]) -> defaultdict[
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        path = Path(sys.argv[1])
-    else:
-        path = Path.cwd()
-
+    path = Path.cwd()
     files = Path(path).rglob("*.py")
     for file in sorted(files):
         if IGNORE_VENV and "site-packages" in file.parts:
